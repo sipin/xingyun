@@ -48,3 +48,9 @@ func (ctx *Context) Unauthorized() {
 func (ctx *Context) Forbidden() {
 	ctx.WriteHeader(403)
 }
+
+func (ctx *Context) Redirect(url_ string) {
+	ctx.ResponseWriter.Header().Set("Location", url_)
+	ctx.ResponseWriter.WriteHeader(302)
+	ctx.ResponseWriter.Write([]byte("Redirecting to: " + url_))
+}
