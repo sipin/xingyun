@@ -1,4 +1,4 @@
 * GetContent, Context loader and cleaner                    OK
 * Redirect                                                  OK
+* XSRF context and pipe handler                             OK
 * Example
-* XSRF context and pipe handler
