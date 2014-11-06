@@ -3,6 +3,7 @@ package xingyun
 import (
 	"net/http"
 
+	"code.1dmy.com/xyz/logex"
 	"github.com/gorilla/securecookie"
 )
 
@@ -21,11 +22,17 @@ type Server struct {
 
 	Name         string
 	Logger       Logger
-	SecureCookie securecookie.SecureCookie
+	SecureCookie *securecookie.SecureCookie
 }
 
-func NewServer(router Router, logger Logger) *Server {
-	return &Server{Router: router, Logger: logger}
+func NewServer(config *Config) *Server {
+	server := &Server{
+		Router: NewRouter(),
+		Logger: logex.NewLogger(1),
+	}
+	server.StaticDir = http.Dir(config.StaticDir)
+	server.SecureCookie = securecookie.New([]byte(config.CookieSecret), []byte(config.CookieSecret))
+	return server
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {

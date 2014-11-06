@@ -25,7 +25,6 @@ func (ctx *Context) GetStaticUrl(url string) string {
 	}
 
 	hash := ctx.getStaticFileHash(url)
-
 	if hash == "" {
 		return cfg.StaticHost + url
 	}
