@@ -1,4 +1,5 @@
 * GetContent, Context loader and cleaner                    OK
 * Redirect                                                  OK
 * XSRF context and pipe handler                             OK
+* change behaiver of default pipe handler
 * Example
