@@ -23,7 +23,7 @@ type Pipe struct {
 	Handlers []PipeHandler
 }
 
-func NewPipe(server *Server, handlers ...PipeHandler) *Pipe {
+func newPipe(server *Server, handlers ...PipeHandler) *Pipe {
 	pipe := &Pipe{Server: server}
 	pipe.Use(handlers...)
 	return pipe
