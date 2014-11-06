@@ -81,7 +81,7 @@ func (s *Server) name() string {
 }
 
 func (s *Server) ListenAndServe(addr string) error {
-	s.Logger.Infof("%s start on %s", s.name(), addr)
+	s.Logger.Infof("%s start in: %s", s.name(), addr)
 	err := http.ListenAndServe(addr, s)
 	s.Logger.Errorf("%s stop, err='%s'", err)
 	return err
