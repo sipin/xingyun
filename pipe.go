@@ -12,6 +12,12 @@ func (h PipeHandlerFunc) ServePipe(w http.ResponseWriter, r *http.Request, next 
 	h(w, r, next)
 }
 
+func Wrap(h PipeHandler, f ContextHandlerFunc) ContextHandlerFunc {
+	return func(ctx *Context) {
+		h.ServePipe(ctx.ResponseWriter, ctx.Request, ToHTTPHandler(f))
+	}
+}
+
 type Pipe struct {
 	Server   *Server
 	Handlers []PipeHandler
