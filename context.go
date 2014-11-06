@@ -1,7 +1,6 @@
 package xingyun
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/context"
@@ -23,13 +22,13 @@ func (h ContextHandlerFunc) ServeContext(ctx *Context) {
 
 func ToHTTPHandlerFunc(h ContextHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		h.ServeContext(GetContext(r))
+		h.ServeContext(getUnInitedContext(r, w))
 	}
 }
 
 func ToHTTPHandler(h ContextHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h.ServeContext(GetContext(r))
+		h.ServeContext(getUnInitedContext(r, w))
 	})
 }
 
@@ -61,14 +60,31 @@ type Context struct {
 	// use for user PipeHandler. avoid name conflict
 	PipeHandlerData map[string]interface{}
 
+	isInited   bool
 	flash      *Flash
 	staticData map[string][]string
 	opts       *Options
 	xsrf       XSRF
 }
 
-func NewContext(r *http.Request, w http.ResponseWriter, s *Server) *Context {
-	ctx := &Context{
+func GetContext(r *http.Request) *Context {
+	obj, ok := context.GetOk(r, CONTEXT_KEY)
+	if !ok {
+		panic("can't get context")
+	}
+	ctx := obj.(*Context)
+	if !ctx.isInited {
+		panic("get uninited context")
+	}
+	return ctx
+}
+
+func initContext(r *http.Request, w http.ResponseWriter, s *Server) *Context {
+	ctx := getUnInitedContext(r, w)
+	if ctx.isInited {
+		return ctx
+	}
+	*ctx = Context{
 		ResponseWriter: w,
 		Request:        r,
 		Server:         s,
@@ -78,14 +94,17 @@ func NewContext(r *http.Request, w http.ResponseWriter, s *Server) *Context {
 		Data:           map[string]interface{}{},
 		staticData:     map[string][]string{},
 	}
+	ctx.isInited = true
 	context.Set(r, CONTEXT_KEY, ctx)
 	return ctx
 }
 
-func GetContext(r *http.Request) *Context {
+func getUnInitedContext(r *http.Request, w http.ResponseWriter) *Context {
 	ctx, ok := context.GetOk(r, CONTEXT_KEY)
 	if !ok {
-		panic(fmt.Errorf("can't get context"))
+		newctx := &Context{Request: r, ResponseWriter: w}
+		context.Set(r, CONTEXT_KEY, newctx)
+		return newctx
 	}
 	return ctx.(*Context)
 }

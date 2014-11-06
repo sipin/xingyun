@@ -26,6 +26,7 @@ func NewServer(config *Config) *Server {
 	server := &Server{
 		Router: NewRouter(),
 		Logger: logex.NewLogger(1),
+		Config: config,
 	}
 	server.StaticDir = http.Dir(config.StaticDir)
 	server.SecureCookie = securecookie.New([]byte(config.CookieSecret), []byte(config.CookieSecret))
@@ -43,7 +44,7 @@ func NewServer(config *Config) *Server {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.Router.ServeHTTP(w, r)
+	s.Router.ServeHTTP(NewResponseWriter(w), r)
 }
 
 func (s *Server) NewPipe(name string, handlers ...PipeHandler) *Pipe {

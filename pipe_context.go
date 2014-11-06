@@ -11,7 +11,7 @@ func (s *Server) GetContextPipeHandler() PipeHandler {
 		s.Logger.Tracef("enter")
 		defer s.Logger.Tracef("exit")
 
-		NewContext(r, w, s)
+		initContext(r, w, s)
 		defer context.Clear(r)
 		next.ServeHTTP(w, r)
 	})

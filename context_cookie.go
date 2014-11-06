@@ -32,7 +32,6 @@ func (ctx *Context) GetCookie(name string, value interface{}) error {
 	r := ctx.Request
 	cookie, err := r.Cookie(name)
 	if err != nil {
-		ctx.Logger.Errorf(err.Error())
 		return err
 	}
 	return cookier.Decode(name, cookie.Value, value)

@@ -10,13 +10,13 @@ import (
 )
 
 func (s *Server) GetRecoverPipeHandler() PipeHandler {
-	return PipeHandlerFunc(func(rw http.ResponseWriter, r *http.Request, next http.Handler) {
+	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.Handler) {
 		s.Logger.Tracef("enter")
 		defer s.Logger.Tracef("exit")
 
 		defer func() {
 			if err := recover(); err != nil {
-				rw.WriteHeader(http.StatusInternalServerError)
+				w.WriteHeader(http.StatusInternalServerError)
 
 				var stacks []string
 				for i := 1; ; i += 1 {
@@ -31,6 +31,6 @@ func (s *Server) GetRecoverPipeHandler() PipeHandler {
 			}
 		}()
 
-		next.ServeHTTP(rw, r)
+		next.ServeHTTP(w, r)
 	})
 }
