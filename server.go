@@ -17,6 +17,7 @@ type Server struct {
 	Logger              Logger
 	SecureCookie        *securecookie.SecureCookie
 	DefaultPipeHandlers []PipeHandler
+	StaticHandler       http.Handler
 
 	pipes map[string]*Pipe
 }
@@ -24,21 +25,25 @@ type Server struct {
 func NewServer(config *Config) *Server {
 	setDefaultConfig(config)
 	server := &Server{
-		Router: NewRouter(),
 		Logger: logex.NewLogger(1),
 		Config: config,
 	}
-	server.StaticDir = http.Dir(config.StaticDir)
-	server.SecureCookie = securecookie.New([]byte(config.CookieSecret), []byte(config.CookieSecret))
 
+	server.pipes = map[string]*Pipe{}
 	server.DefaultPipeHandlers = []PipeHandler{
 		server.GetLogPipeHandler(),
 		server.GetRecoverPipeHandler(),
-		server.GetStaticPipeHandler(),
 		server.GetContextPipeHandler(),
 	}
 
-	server.pipes = map[string]*Pipe{}
+	server.StaticHandler = server.GetStaticHandler()
+	server.Router = NewRouter(server.StaticHandler)
+	server.StaticDir = http.Dir(config.StaticDir)
+
+	server.SecureCookie = securecookie.New(
+		[]byte(config.CookieSecret),
+		[]byte(config.CookieSecret),
+	)
 
 	return server
 }

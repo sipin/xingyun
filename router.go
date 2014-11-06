@@ -18,8 +18,10 @@ type router struct {
 	router *mux.Router
 }
 
-func NewRouter() Router {
-	return &router{mux.NewRouter()}
+func NewRouter(notFound http.Handler) Router {
+	gorillaRouter := mux.NewRouter()
+	gorillaRouter.NotFoundHandler = notFound
+	return &router{router: gorillaRouter}
 }
 
 func (r *router) Get(path string, h ContextHandlerFunc) {

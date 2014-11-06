@@ -6,11 +6,15 @@ import (
 	"strings"
 )
 
+func (s *Server) GetStaticHandler() http.Handler {
+	staticPipe := s.NewPipe("_XINGYUN_STATIC_",
+		s.GetStaticPipeHandler(),
+	)
+	return staticPipe.HTTPHandler(http.NotFoundHandler())
+}
+
 func (s *Server) GetStaticPipeHandler() PipeHandler {
 	return PipeHandlerFunc(func(rw http.ResponseWriter, r *http.Request, next http.Handler) {
-		s.Logger.Tracef("enter")
-		defer s.Logger.Tracef("exit")
-
 		cfg := s.Config
 		if r.Method != "GET" && r.Method != "HEAD" {
 			next.ServeHTTP(rw, r)
