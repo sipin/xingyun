@@ -1,12 +1,27 @@
 package xingyun
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/gorilla/securecookie"
+)
+
+type Config struct {
+	CookieSecret          string
+	StaticDir             string
+	StaticHost            string
+	StaticHostExcludeType string
+	StaticHostExcludeFile string
+}
 
 type Server struct {
 	Router
+	Config    *Config
+	StaticDir http.FileSystem
 
-	Name   string
-	Logger Logger
+	Name         string
+	Logger       Logger
+	SecureCookie securecookie.SecureCookie
 }
 
 func NewServer(router Router, logger Logger) *Server {
