@@ -94,6 +94,7 @@ func initContext(r *http.Request, w http.ResponseWriter, s *Server) *Context {
 		Data:           map[string]interface{}{},
 		staticData:     map[string][]string{},
 	}
+	ctx.parseParams()
 	ctx.isInited = true
 	context.Set(r, CONTEXT_KEY, ctx)
 	return ctx
@@ -109,7 +110,7 @@ func getUnInitedContext(r *http.Request, w http.ResponseWriter) *Context {
 	return ctx.(*Context)
 }
 
-func (ctx *Context) parseParams(s string) {
+func (ctx *Context) parseParams() {
 	var err error
 	err = ctx.Request.ParseForm()
 	if err != nil {

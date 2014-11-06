@@ -32,7 +32,9 @@ func newPipe(server *Server, handlers ...PipeHandler) *Pipe {
 func (p *Pipe) ServePipe(w http.ResponseWriter, r *http.Request, h http.Handler) {
 	switch len(p.Handlers) {
 	case 0:
+		p.Server.Logger.Tracef("user handler enter")
 		h.ServeHTTP(w, r)
+		p.Server.Logger.Tracef("user handler exit")
 	case 1:
 		handler := p.Handlers[0]
 		handler.ServePipe(w, r, h)

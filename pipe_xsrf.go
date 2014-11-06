@@ -180,6 +180,7 @@ func (s *Server) GetXSRFGeneratePipeHandler() PipeHandler {
 		ctx.xsrf = x
 
 		if !isAllowedOrigin(opts, r) {
+			ctx.Forbidden()
 			return
 		}
 
@@ -196,6 +197,8 @@ func (s *Server) GetXSRFGeneratePipeHandler() PipeHandler {
 		if opts.SetHeader {
 			w.Header().Add(opts.Header, x.Token)
 		}
+
+		next.ServeHTTP(w, r)
 	})
 }
 
@@ -204,18 +207,26 @@ func (s *Server) GetXSRFValidatePipeHandler() PipeHandler {
 		s.Logger.Tracef("enter")
 		defer s.Logger.Tracef("exit")
 
+		if r.Method == "GET" || r.Method == "HEAD" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		ctx := GetContext(r)
 		x := ctx.xsrf
 		if token := r.Header.Get(x.GetHeaderName()); token != "" {
 			if !x.ValidToken(token) {
 				x.Error(w)
 			}
+			next.ServeHTTP(w, r)
 			return
 		}
 		if token := r.FormValue(x.GetFormName()); token != "" {
 			if !x.ValidToken(token) {
 				x.Error(w)
 			}
+
+			next.ServeHTTP(w, r)
 			return
 		}
 

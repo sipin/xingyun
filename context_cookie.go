@@ -6,7 +6,7 @@ import (
 )
 
 func (ctx *Context) SetCookie(name string, value interface{}) {
-	ctx.SetCookie(name, value)
+	ctx.SetExpireCookie(name, value, 0)
 }
 
 func (ctx *Context) SetExpireCookie(name string, value interface{}, sec int64) {
