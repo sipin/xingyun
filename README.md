@@ -2,27 +2,30 @@
 
 ### 对象 ###
 
-- Server: pipe容器
-- Pipe: 对请求做前、后置处理
+- Server: 包含处理请求的所有相关组件。继承Router，用于设置路由。Pipe容器，管理Pipe
+- Pipe: PipeHandler队列
 - Context: 请求相关的数据
 
 ### 接口 ###
 
-- http.Handler
-- pipe.Handler (negroni.Handler)
+- ContextHandler:
+
+		type ContextHandler interface {
+			ServeContext(ctx *Context)
+		}
+
+
+- PipeHandler (类似negroni.Handler)
 - Config
-- Logger
-- Router: 用于Pipe路由Handler路由
+- Logger: 统一LOG格式
+- Router: 设置路由
 
 ### 目标 ###
 
-- 提供机制、而不**只是**实现
-- 方便扩展
-- 默认配置功能强大、容易使用
-- 使用代码生成作为元编程
-- Everything is http.Handler
+- 使用接口类似web.go
+- 提供类似negroni的web中间件机制
 
-### Core SubContext ###
+### Context ###
 
 - Cookie
 - Session
@@ -35,3 +38,4 @@
 - Logger
 - Recover
 - Static
+- XSRF
