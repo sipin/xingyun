@@ -2,6 +2,7 @@ package xingyun
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 
 	"code.1dmy.com/xyz/logex"
@@ -20,6 +21,7 @@ type Server struct {
 	StaticHandler       http.Handler
 
 	pipes map[string]*Pipe
+	l     net.Listener
 }
 
 func NewServer(config *Config) *Server {
@@ -81,8 +83,21 @@ func (s *Server) name() string {
 }
 
 func (s *Server) ListenAndServe(addr string) error {
+	l, err := net.Listen("tcp", addr)
+	if err != nil {
+		s.Logger.Errorf(err.Error())
+	}
+	s.l = l
 	s.Logger.Infof("%s start in: %s", s.name(), addr)
-	err := http.ListenAndServe(addr, s)
-	s.Logger.Errorf("%s stop, err='%s'", err)
+	err = http.Serve(s.l, s)
+	// todo: must handle error when serve failed
+	// s.Logger.Errorf("%s stop, err='%s'", err)
 	return err
+}
+
+func (s *Server) Stop() error {
+	if s.l != nil {
+		return s.l.Close()
+	}
+	return nil
 }
