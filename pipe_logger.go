@@ -21,6 +21,6 @@ func (s *Server) GetLogPipeHandler() PipeHandler {
 		if status >= 500 && status <= 599 {
 			log = logex.Errorf
 		}
-		log("%v %s %s %s in %v", res.Status(), r.Method, r.RemoteAddr, r.URL.Path, time.Since(start))
+		log("%v %s %s %s in %v", res.Status(), r.Method, r.Host, r.URL.Path, time.Since(start))
 	})
 }
