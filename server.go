@@ -49,6 +49,7 @@ func NewServer(config *Config) *Server {
 		server.GetLogPipeHandler(),
 		server.GetRecoverPipeHandler(),
 		server.GetStaticPipeHandler(),
+		server.GetContextPipeHandler(),
 	}
 	return server
 }

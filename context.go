@@ -1,6 +1,15 @@
 package xingyun
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/gorilla/context"
+)
+
+const (
+	CONTEXT_KEY = "_XINGYUN_CONTEXT_"
+)
 
 type ContextHandler interface {
 	ServeContext(ctx *Context)
@@ -10,10 +19,6 @@ type ContextHandlerFunc func(ctx *Context)
 
 func (h ContextHandlerFunc) ServeContext(ctx *Context) {
 	h(ctx)
-}
-
-func GetContext(r *http.Request) *Context {
-	return nil
 }
 
 func ToHTTPHandlerFunc(h ContextHandler) http.HandlerFunc {
@@ -46,8 +51,7 @@ type Context struct {
 	Server  *Server
 	Config  *Config
 
-	Logger         Logger
-	SessionStorage SessionStorage
+	Logger Logger
 
 	UserID string
 	Params map[string]string
@@ -55,6 +59,29 @@ type Context struct {
 
 	flash      *Flash
 	staticData map[string][]string
+}
+
+func NewContext(r *http.Request, w http.ResponseWriter, s *Server) *Context {
+	ctx := &Context{
+		ResponseWriter: w,
+		Request:        r,
+		Server:         s,
+		Config:         s.Config,
+		Logger:         s.Logger,
+		Params:         map[string]string{},
+		Data:           map[string]interface{}{},
+		staticData:     map[string][]string{},
+	}
+	context.Set(r, CONTEXT_KEY, ctx)
+	return ctx
+}
+
+func GetContext(r *http.Request) *Context {
+	ctx, ok := context.GetOk(r, CONTEXT_KEY)
+	if !ok {
+		panic(fmt.Errorf("can't get context"))
+	}
+	return ctx.(*Context)
 }
 
 func (ctx *Context) parseParams(s string) {
