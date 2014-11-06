@@ -2,20 +2,23 @@ package xingyun
 
 import "net/http"
 
-var (
-	DefaultPipeHandlers = []PipeHandler{}
-)
-
 type PipeHandler interface {
 	ServePipe(w http.ResponseWriter, r *http.Request, next http.Handler)
 }
 
+type PipeHandlerFunc func(w http.ResponseWriter, r *http.Request, next http.Handler)
+
+func (h PipeHandlerFunc) ServePipe(w http.ResponseWriter, r *http.Request, next http.Handler) {
+	h(w, r, next)
+}
+
 type Pipe struct {
+	Server   *Server
 	Handlers []PipeHandler
 }
 
-func NewPipe(handlers ...PipeHandler) *Pipe {
-	pipe := &Pipe{}
+func NewPipe(server *Server, handlers ...PipeHandler) *Pipe {
+	pipe := &Pipe{Server: server}
 	pipe.Use(handlers...)
 	return pipe
 }
@@ -29,7 +32,7 @@ func (p *Pipe) ServePipe(w http.ResponseWriter, r *http.Request, h http.Handler)
 		handler.ServePipe(w, r, h)
 	default:
 		handler := p.Handlers[0]
-		sub := &Pipe{p.Handlers[1:]}
+		sub := &Pipe{Server: p.Server, Handlers: p.Handlers[1:]}
 		handler.ServePipe(w, r, sub.HTTPHandler(h))
 	}
 }
@@ -55,7 +58,7 @@ func (p *Pipe) HTTPHandler(h http.Handler) http.Handler {
 		})
 	default:
 		handler := p.Handlers[0]
-		sub := &Pipe{p.Handlers[1:]}
+		sub := &Pipe{Server: p.Server, Handlers: p.Handlers[1:]}
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			handler.ServePipe(w, r, sub.HTTPHandler(h))
 		})
@@ -68,8 +71,8 @@ func (p *Pipe) ContextHandler(h ContextHandler) ContextHandler {
 }
 
 func (p *Pipe) Use(handlers ...PipeHandler) {
-	if len(DefaultPipeHandlers) != 0 {
-		p.Handlers = DefaultPipeHandlers
+	if len(p.Server.DefaultPipeHandlers) != 0 {
+		p.Handlers = p.Server.DefaultPipeHandlers
 	}
 	for _, h := range handlers {
 		p.Handlers = append(p.Handlers, h)

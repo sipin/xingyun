@@ -8,11 +8,22 @@ import (
 )
 
 type Config struct {
-	CookieSecret          string
-	StaticDir             string
+	CookieSecret string
+
+	StaticDir       string
+	StaticPrefix    string
+	StaticIndexFile string
+
 	StaticHost            string
 	StaticHostExcludeType string
 	StaticHostExcludeFile string
+	EnableXSRF            bool
+}
+
+func setDefaultConfig(config *Config) {
+	if config.StaticIndexFile == "" {
+		config.StaticIndexFile = "index.html"
+	}
 }
 
 type Server struct {
@@ -20,18 +31,25 @@ type Server struct {
 	Config    *Config
 	StaticDir http.FileSystem
 
-	Name         string
-	Logger       Logger
-	SecureCookie *securecookie.SecureCookie
+	Name                string
+	Logger              Logger
+	SecureCookie        *securecookie.SecureCookie
+	DefaultPipeHandlers []PipeHandler
 }
 
 func NewServer(config *Config) *Server {
+	setDefaultConfig(config)
 	server := &Server{
 		Router: NewRouter(),
 		Logger: logex.NewLogger(1),
 	}
 	server.StaticDir = http.Dir(config.StaticDir)
 	server.SecureCookie = securecookie.New([]byte(config.CookieSecret), []byte(config.CookieSecret))
+	server.DefaultPipeHandlers = []PipeHandler{
+		server.GetLogPipeHandler(),
+		server.GetRecoverPipeHandler(),
+		server.GetStaticPipeHandler(),
+	}
 	return server
 }
 
