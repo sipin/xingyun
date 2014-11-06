@@ -55,10 +55,16 @@ type Context struct {
 
 	UserID string
 	Params map[string]string
-	Data   map[string]interface{}
+
+	// use for user ContextHandler
+	Data map[string]interface{}
+	// use for user PipeHandler. avoid name conflict
+	PipeHandlerData map[string]interface{}
 
 	flash      *Flash
 	staticData map[string][]string
+	opts       *Options
+	xsrf       XSRF
 }
 
 func NewContext(r *http.Request, w http.ResponseWriter, s *Server) *Context {
