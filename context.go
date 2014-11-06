@@ -16,6 +16,12 @@ func GetContext(r *http.Request) *Context {
 	return nil
 }
 
+func ToHTTPHandlerFunc(h ContextHandler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		h.ServeContext(GetContext(r))
+	}
+}
+
 func ToHTTPHandler(h ContextHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h.ServeContext(GetContext(r))
