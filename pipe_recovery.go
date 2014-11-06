@@ -11,6 +11,9 @@ import (
 
 func (s *Server) GetRecoverPipeHandler() PipeHandler {
 	return PipeHandlerFunc(func(rw http.ResponseWriter, r *http.Request, next http.Handler) {
+		s.Logger.Tracef("enter")
+		defer s.Logger.Tracef("exit")
+
 		defer func() {
 			if err := recover(); err != nil {
 				rw.WriteHeader(http.StatusInternalServerError)

@@ -11,8 +11,10 @@ import (
 
 func (s *Server) GetLogPipeHandler() PipeHandler {
 	return PipeHandlerFunc(func(rw http.ResponseWriter, r *http.Request, next http.Handler) {
-		start := time.Now()
+		s.Logger.Tracef("enter")
+		defer s.Logger.Tracef("exit")
 
+		start := time.Now()
 		next.ServeHTTP(rw, r)
 
 		res := rw.(negroni.ResponseWriter)
