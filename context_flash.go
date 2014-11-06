@@ -5,12 +5,11 @@ type Flash struct {
 	Notice string
 }
 
-const (
-	FlashExpire = 60
+var (
+	FlashExpire    int64  = 60
+	FlashAlertKey  string = "ZQFA"
+	FlashNoticeKey string = "ZQFN"
 )
-
-var FlashAlertKey string = "ZQFA"
-var FlashNoticeKey string = "ZQFN"
 
 func (ctx *Context) SetFlashAlert(msg string) {
 	ctx.SetExpireCookie(FlashAlertKey, msg, FlashExpire)

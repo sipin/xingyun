@@ -37,10 +37,10 @@ func (p *Pipe) ServePipe(w http.ResponseWriter, r *http.Request, h http.Handler)
 	}
 }
 
-var VoidHTTPHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+var voidHTTPHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 
 func (p *Pipe) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	p.ServePipe(w, r, VoidHTTPHandler)
+	p.ServePipe(w, r, voidHTTPHandler)
 }
 
 func (p *Pipe) ServeContext(ctx *Context) {
