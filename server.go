@@ -7,25 +7,6 @@ import (
 	"github.com/gorilla/securecookie"
 )
 
-type Config struct {
-	CookieSecret string
-
-	StaticDir       string
-	StaticPrefix    string
-	StaticIndexFile string
-
-	StaticHost            string
-	StaticHostExcludeType string
-	StaticHostExcludeFile string
-	EnableXSRF            bool
-}
-
-func setDefaultConfig(config *Config) {
-	if config.StaticIndexFile == "" {
-		config.StaticIndexFile = "index.html"
-	}
-}
-
 type Server struct {
 	Router
 	Config    *Config
