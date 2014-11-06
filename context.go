@@ -26,6 +26,12 @@ func ToHTTPHandlerFunc(h ContextHandler) http.HandlerFunc {
 	}
 }
 
+func FromHTTPHandlerFunc(h http.HandlerFunc) ContextHandlerFunc {
+	return func(ctx *Context) {
+		h.ServeHTTP(ctx.ResponseWriter, ctx.Request)
+	}
+}
+
 func ToHTTPHandler(h ContextHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h.ServeContext(getUnInitedContext(r, w))
