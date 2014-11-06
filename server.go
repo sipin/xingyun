@@ -23,6 +23,9 @@ type Server struct {
 }
 
 func NewServer(config *Config) *Server {
+	if config == nil {
+		config = &Config{}
+	}
 	setDefaultConfig(config)
 	server := &Server{
 		Logger: logex.NewLogger(1),
