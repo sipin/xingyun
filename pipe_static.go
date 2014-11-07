@@ -7,37 +7,37 @@ import (
 )
 
 func (s *Server) GetStaticPipeHandler() PipeHandler {
-	return PipeHandlerFunc(func(rw http.ResponseWriter, r *http.Request, next http.Handler) {
+	return PipeHandlerFunc(func(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		s.Logger.Tracef("enter static handler")
 		defer s.Logger.Tracef("exit static handler")
 
 		cfg := s.Config
 		if r.Method != "GET" && r.Method != "HEAD" {
-			next.ServeHTTP(rw, r)
+			next(rw, r)
 			return
 		}
 		file := r.URL.Path
 		if cfg.StaticPrefix != "" {
 			if !strings.HasPrefix(file, cfg.StaticPrefix) {
-				next.ServeHTTP(rw, r)
+				next(rw, r)
 				return
 			}
 			file = file[len(cfg.StaticPrefix):]
 			if file != "" && file[0] != '/' {
-				next.ServeHTTP(rw, r)
+				next(rw, r)
 				return
 			}
 		}
 		f, err := s.StaticDir.Open(file)
 		if err != nil {
-			next.ServeHTTP(rw, r)
+			next(rw, r)
 			return
 		}
 		defer f.Close()
 
 		fi, err := f.Stat()
 		if err != nil {
-			next.ServeHTTP(rw, r)
+			next(rw, r)
 			return
 		}
 
@@ -50,14 +50,14 @@ func (s *Server) GetStaticPipeHandler() PipeHandler {
 			file = path.Join(file, cfg.StaticIndexFile)
 			f, err = s.StaticDir.Open(file)
 			if err != nil {
-				next.ServeHTTP(rw, r)
+				next(rw, r)
 				return
 			}
 			defer f.Close()
 
 			fi, err = f.Stat()
 			if err != nil || fi.IsDir() {
-				next.ServeHTTP(rw, r)
+				next(rw, r)
 				return
 			}
 		}

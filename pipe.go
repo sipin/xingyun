@@ -3,18 +3,18 @@ package xingyun
 import "net/http"
 
 type PipeHandler interface {
-	ServePipe(w http.ResponseWriter, r *http.Request, next http.Handler)
+	ServePipe(w http.ResponseWriter, r *http.Request, next http.HandlerFunc)
 }
 
-type PipeHandlerFunc func(w http.ResponseWriter, r *http.Request, next http.Handler)
+type PipeHandlerFunc func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc)
 
-func (h PipeHandlerFunc) ServePipe(w http.ResponseWriter, r *http.Request, next http.Handler) {
+func (h PipeHandlerFunc) ServePipe(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	h(w, r, next)
 }
 
 func Wrap(h PipeHandler, f ContextHandlerFunc) ContextHandlerFunc {
 	return func(ctx *Context) {
-		h.ServePipe(ctx.ResponseWriter, ctx.Request, ToHTTPHandler(f))
+		h.ServePipe(ctx.ResponseWriter, ctx.Request, ToHTTPHandlerFunc(f))
 	}
 }
 
@@ -29,7 +29,7 @@ func newPipe(server *Server, handlers ...PipeHandler) *Pipe {
 	return pipe
 }
 
-func (p *Pipe) ServePipe(w http.ResponseWriter, r *http.Request, h http.Handler) {
+func (p *Pipe) ServePipe(w http.ResponseWriter, r *http.Request, h http.HandlerFunc) {
 	switch len(p.Handlers) {
 	case 0:
 		p.Server.Logger.Tracef("user handler enter")
@@ -41,7 +41,7 @@ func (p *Pipe) ServePipe(w http.ResponseWriter, r *http.Request, h http.Handler)
 	default:
 		handler := p.Handlers[0]
 		sub := &Pipe{Server: p.Server, Handlers: p.Handlers[1:]}
-		handler.ServePipe(w, r, sub.HTTPHandler(h))
+		handler.ServePipe(w, r, sub.HTTPHandler(h).ServeHTTP)
 	}
 }
 
@@ -62,13 +62,13 @@ func (p *Pipe) HTTPHandler(h http.Handler) http.Handler {
 	case 1:
 		handler := p.Handlers[0]
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			handler.ServePipe(w, r, h)
+			handler.ServePipe(w, r, h.ServeHTTP)
 		})
 	default:
 		handler := p.Handlers[0]
 		sub := &Pipe{Server: p.Server, Handlers: p.Handlers[1:]}
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			handler.ServePipe(w, r, sub.HTTPHandler(h))
+			handler.ServePipe(w, r, sub.HTTPHandler(h).ServeHTTP)
 		})
 	}
 }

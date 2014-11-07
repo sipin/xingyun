@@ -163,7 +163,7 @@ func setCookie(opts *Options, x *xsrf, w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) GetXSRFGeneratePipeHandler() PipeHandler {
-	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.Handler) {
+	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		s.Logger.Tracef("enter xsrf generater")
 		defer s.Logger.Tracef("exit xsrf generater")
 
@@ -198,17 +198,17 @@ func (s *Server) GetXSRFGeneratePipeHandler() PipeHandler {
 			w.Header().Add(opts.Header, x.Token)
 		}
 
-		next.ServeHTTP(w, r)
+		next(w, r)
 	})
 }
 
 func (s *Server) GetXSRFValidatePipeHandler() PipeHandler {
-	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.Handler) {
+	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		s.Logger.Tracef("enter xsrf validater")
 		defer s.Logger.Tracef("exit xsrf validater")
 
 		if r.Method == "GET" || r.Method == "HEAD" {
-			next.ServeHTTP(w, r)
+			next(w, r)
 			return
 		}
 
@@ -218,7 +218,7 @@ func (s *Server) GetXSRFValidatePipeHandler() PipeHandler {
 			if !x.ValidToken(token) {
 				x.Error(w)
 			}
-			next.ServeHTTP(w, r)
+			next(w, r)
 			return
 		}
 		if token := r.FormValue(x.GetFormName()); token != "" {
@@ -226,7 +226,7 @@ func (s *Server) GetXSRFValidatePipeHandler() PipeHandler {
 				x.Error(w)
 			}
 
-			next.ServeHTTP(w, r)
+			next(w, r)
 			return
 		}
 

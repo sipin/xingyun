@@ -7,12 +7,12 @@ import (
 )
 
 func (s *Server) GetContextPipeHandler() PipeHandler {
-	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.Handler) {
+	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		s.Logger.Tracef("enter context handler")
 		defer s.Logger.Tracef("exit context handler")
 
 		ctx := initContext(r, w, s)
-		next.ServeHTTP(w, r)
+		next(w, r)
 		ctx.Logger.Debugf("clear context, &r=%p", r)
 		context.Clear(r)
 	})
