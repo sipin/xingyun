@@ -3,8 +3,6 @@ package xingyun
 import (
 	"net/http"
 	"time"
-
-	"code.1dmy.com/xyz/logex"
 )
 
 func (s *Server) GetLogPipeHandler() PipeHandler {
@@ -16,10 +14,13 @@ func (s *Server) GetLogPipeHandler() PipeHandler {
 		next.ServeHTTP(w, r)
 
 		res := w.(ResponseWriter)
-		log := logex.Infof
+		log := s.Logger.Infof
 		status := res.Status()
 		if status >= 500 && status <= 599 {
-			log = logex.Errorf
+			log = s.Logger.Errorf
+		}
+		if status >= 400 && status <= 499 {
+			log = s.Logger.Warnf
 		}
 		log("%v %s %s %s in %v", res.Status(), r.Method, r.Host, r.URL.Path, time.Since(start))
 	})

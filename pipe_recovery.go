@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"runtime"
 	"strings"
-
-	"code.1dmy.com/xyz/logex"
 )
 
 func DefaultPanicHandler(ctx *Context) {
@@ -14,7 +12,7 @@ func DefaultPanicHandler(ctx *Context) {
 	r := ctx.Request
 	w.WriteHeader(http.StatusInternalServerError)
 
-	logex.Errorf("%s %s: %s\n%s", r.Method, r.RequestURI, ctx.PanicError, ctx.StackMessage)
+	ctx.Logger.Errorf("%s %s: %s\n%s", r.Method, r.RequestURI, ctx.PanicError, ctx.StackMessage)
 }
 
 func (s *Server) GetRecoverPipeHandler() PipeHandler {
