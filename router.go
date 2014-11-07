@@ -15,29 +15,34 @@ type Router interface {
 }
 
 type router struct {
-	router *mux.Router
+	router     *mux.Router
+	afterRoute PipeHandler
 }
 
-func newRouter() Router {
+func newRouter(afterRoute PipeHandler) *router {
 	gorillaRouter := mux.NewRouter()
 	gorillaRouter.KeepContext = true
-	return &router{router: gorillaRouter}
+	return &router{router: gorillaRouter, afterRoute: afterRoute}
+}
+
+func (r *router) getWrapHandler(h ContextHandlerFunc) http.Handler {
+	return ToHTTPHandlerFunc(Wrap(r.afterRoute, h))
 }
 
 func (r *router) Get(path string, h ContextHandlerFunc) {
-	r.router.Handle(path, ToHTTPHandler(h)).Methods("GET")
+	r.router.Handle(path, r.getWrapHandler(h)).Methods("GET")
 }
 
 func (r *router) Post(path string, h ContextHandlerFunc) {
-	r.router.Handle(path, ToHTTPHandler(h)).Methods("POST")
+	r.router.Handle(path, r.getWrapHandler(h)).Methods("POST")
 }
 
 func (r *router) Handle(path string, h ContextHandler) {
-	r.router.Handle(path, ToHTTPHandler(h))
+	r.router.Handle(path, r.getWrapHandler(h.ServeContext))
 }
 
 func (r *router) HandleFunc(path string, h ContextHandlerFunc) {
-	r.router.HandleFunc(path, ToHTTPHandlerFunc(h))
+	r.router.HandleFunc(path, r.getWrapHandler(h).ServeHTTP)
 }
 
 func (r *router) ServeHTTP(w http.ResponseWriter, req *http.Request) {

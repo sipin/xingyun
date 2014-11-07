@@ -43,7 +43,7 @@ func NewServer(config *Config) *Server {
 		server.GetStaticPipeHandler(),
 	}
 
-	server.Router = newRouter()
+	server.Router = newRouter(server.getURLVarLoaderPipeHandler())
 	server.StaticDir = http.Dir(config.StaticDir)
 
 	server.SecureCookie = securecookie.New(
