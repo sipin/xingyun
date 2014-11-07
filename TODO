@@ -2,4 +2,6 @@
 * Redirect                                                  OK
 * XSRF context and pipe handler                             OK
 * change behaiver of default pipe handler
+* add PipeHandler ErrorPage
+* add Session
 * Example
