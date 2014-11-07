@@ -41,7 +41,6 @@ func NewServer(config *Config) *Server {
 		server.GetLogPipeHandler(),
 		server.GetRecoverPipeHandler(),
 		server.GetStaticPipeHandler(),
-		server.GetContextPipeHandler(),
 	}
 
 	server.Router = newRouter()
@@ -56,7 +55,9 @@ func NewServer(config *Config) *Server {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.defaultPipe = newPipe(s, s.DefaultPipeHandlers...)
+	pipeHandlers := []PipeHandler{s.GetContextPipeHandler()}
+	pipeHandlers = append(pipeHandlers, s.DefaultPipeHandlers...)
+	s.defaultPipe = newPipe(s, pipeHandlers...)
 	h := s.defaultPipe.HTTPHandler(s.Router)
 	h.ServeHTTP(NewResponseWriter(w), r)
 }

@@ -20,6 +20,7 @@ type router struct {
 
 func newRouter() Router {
 	gorillaRouter := mux.NewRouter()
+	gorillaRouter.KeepContext = true
 	return &router{router: gorillaRouter}
 }
 

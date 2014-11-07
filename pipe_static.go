@@ -8,6 +8,9 @@ import (
 
 func (s *Server) GetStaticPipeHandler() PipeHandler {
 	return PipeHandlerFunc(func(rw http.ResponseWriter, r *http.Request, next http.Handler) {
+		s.Logger.Tracef("enter static handler")
+		defer s.Logger.Tracef("exit static handler")
+
 		cfg := s.Config
 		if r.Method != "GET" && r.Method != "HEAD" {
 			next.ServeHTTP(rw, r)

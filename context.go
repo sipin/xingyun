@@ -1,6 +1,7 @@
 package xingyun
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/context"
@@ -80,11 +81,11 @@ type Context struct {
 func GetContext(r *http.Request) *Context {
 	obj, ok := context.GetOk(r, CONTEXT_KEY)
 	if !ok {
-		panic("can't get context")
+		panic(fmt.Errorf("can't get context, &r=%p", r))
 	}
 	ctx := obj.(*Context)
 	if !ctx.isInited {
-		panic("get uninited context")
+		panic(fmt.Errorf("get uninited context, &r=%p", r))
 	}
 	return ctx
 }
@@ -107,6 +108,7 @@ func initContext(r *http.Request, w http.ResponseWriter, s *Server) *Context {
 	ctx.parseParams()
 	ctx.isInited = true
 	context.Set(r, CONTEXT_KEY, ctx)
+	s.Logger.Debugf("init context, &r=%p", r)
 	return ctx
 }
 

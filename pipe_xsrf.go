@@ -164,8 +164,8 @@ func setCookie(opts *Options, x *xsrf, w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) GetXSRFGeneratePipeHandler() PipeHandler {
 	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.Handler) {
-		s.Logger.Tracef("enter")
-		defer s.Logger.Tracef("exit")
+		s.Logger.Tracef("enter xsrf generater")
+		defer s.Logger.Tracef("exit xsrf generater")
 
 		ctx := GetContext(r)
 		opts := getXSRFOptions(s.Config)
@@ -204,8 +204,8 @@ func (s *Server) GetXSRFGeneratePipeHandler() PipeHandler {
 
 func (s *Server) GetXSRFValidatePipeHandler() PipeHandler {
 	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.Handler) {
-		s.Logger.Tracef("enter")
-		defer s.Logger.Tracef("exit")
+		s.Logger.Tracef("enter xsrf validater")
+		defer s.Logger.Tracef("exit xsrf validater")
 
 		if r.Method == "GET" || r.Method == "HEAD" {
 			next.ServeHTTP(w, r)

@@ -9,8 +9,8 @@ import (
 
 func (s *Server) GetLogPipeHandler() PipeHandler {
 	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.Handler) {
-		s.Logger.Tracef("enter")
-		defer s.Logger.Tracef("exit")
+		s.Logger.Tracef("enter logger")
+		defer s.Logger.Tracef("exit logger")
 
 		start := time.Now()
 		next.ServeHTTP(w, r)
