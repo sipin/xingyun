@@ -2,6 +2,8 @@
 * Redirect                                                  OK
 * XSRF context and pipe handler                             OK
 * change behaiver of default pipe handler                   OK
+* context use ResponseWriter instead of http.ResponseWriter OK
+* panic if write header after body
 * add PipeHandler ErrorPage
 * add Session
 * Example

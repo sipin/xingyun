@@ -8,6 +8,6 @@ func (ctx *Context) XSRFToken() string {
 }
 
 func (ctx *Context) XSRFFormField() string {
-	return "<input type=\"hidden\" name=\"_xsrf\" value=\"" +
+	return "<input type=\"hidden\" name=\"" + formatName(ctx.xsrf.GetFormName()) + "\" value=\"" +
 		ctx.XSRFToken() + "\"/>"
 }

@@ -59,7 +59,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	pipeHandlers = append(pipeHandlers, s.DefaultPipeHandlers...)
 	s.defaultPipe = newPipe(s, pipeHandlers...)
 	h := s.defaultPipe.HTTPHandler(s.Router)
-	h.ServeHTTP(NewResponseWriter(w), r)
+	h.ServeHTTP(wrapResponseWriter(w), r)
 }
 
 func (s *Server) NewPipe(name string, handlers ...PipeHandler) *Pipe {

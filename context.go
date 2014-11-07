@@ -45,6 +45,14 @@ func FromHTTPHandler(h http.Handler) ContextHandler {
 	})
 }
 
+func wrapResponseWriter(w http.ResponseWriter) ResponseWriter {
+	rw, ok := w.(ResponseWriter)
+	if ok {
+		return rw
+	}
+	return NewResponseWriter(w)
+}
+
 type SessionStorage interface {
 	SetSession(sessionID string, key string, data []byte)
 	GetSession(sessionID string, key string) []byte
@@ -52,7 +60,7 @@ type SessionStorage interface {
 }
 
 type Context struct {
-	http.ResponseWriter
+	ResponseWriter
 	Request *http.Request
 	Server  *Server
 	Config  *Config
@@ -96,7 +104,7 @@ func initContext(r *http.Request, w http.ResponseWriter, s *Server) *Context {
 		return ctx
 	}
 	*ctx = Context{
-		ResponseWriter: w,
+		ResponseWriter: wrapResponseWriter(w),
 		Request:        r,
 		Server:         s,
 		Config:         s.Config,
@@ -115,7 +123,7 @@ func initContext(r *http.Request, w http.ResponseWriter, s *Server) *Context {
 func getUnInitedContext(r *http.Request, w http.ResponseWriter) *Context {
 	ctx, ok := context.GetOk(r, CONTEXT_KEY)
 	if !ok {
-		newctx := &Context{Request: r, ResponseWriter: w}
+		newctx := &Context{Request: r, ResponseWriter: wrapResponseWriter(w)}
 		context.Set(r, CONTEXT_KEY, newctx)
 		return newctx
 	}
