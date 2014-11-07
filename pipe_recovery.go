@@ -9,6 +9,14 @@ import (
 	"code.1dmy.com/xyz/logex"
 )
 
+func DefaultPanicHandler(ctx *Context) {
+	w := ctx.ResponseWriter
+	r := ctx.Request
+	w.WriteHeader(http.StatusInternalServerError)
+
+	logex.Errorf("%s %s: %s\n%s", r.Method, r.RequestURI, ctx.PanicError, ctx.StackMessage)
+}
+
 func (s *Server) GetRecoverPipeHandler() PipeHandler {
 	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.Handler) {
 		s.Logger.Tracef("enter")
@@ -16,8 +24,9 @@ func (s *Server) GetRecoverPipeHandler() PipeHandler {
 
 		defer func() {
 			if err := recover(); err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-
+				ctx := GetContext(r)
+				ctx.IsPanic = true
+				ctx.PanicError = err
 				var stacks []string
 				for i := 1; ; i += 1 {
 					_, file, line, ok := runtime.Caller(i)
@@ -26,8 +35,7 @@ func (s *Server) GetRecoverPipeHandler() PipeHandler {
 					}
 					stacks = append(stacks, fmt.Sprintf("\t%s:%d", file, line))
 				}
-				stackMsg := strings.Join(stacks, "\n")
-				logex.Errorf("%s %s: %s\n%s", r.Method, r.RequestURI, err, stackMsg)
+				ctx.StackMessage = strings.Join(stacks, "\n")
 			}
 		}()
 

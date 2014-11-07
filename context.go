@@ -61,6 +61,10 @@ type Context struct {
 	UserID string
 	Params map[string]string
 
+	IsPanic      bool
+	PanicError   interface{}
+	StackMessage string
+
 	// use for user ContextHandler
 	Data map[string]interface{}
 	// use for user PipeHandler. avoid name conflict

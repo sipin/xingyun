@@ -18,6 +18,8 @@ type Server struct {
 	Logger              Logger
 	SecureCookie        *securecookie.SecureCookie
 	DefaultPipeHandlers []PipeHandler
+	PanicHandler        ContextHandlerFunc
+	ErrorPageHandler    ContextHandlerFunc
 
 	pipes       map[string]*Pipe
 	defaultPipe *Pipe
@@ -33,7 +35,7 @@ func NewServer(config *Config) *Server {
 		Logger: logex.NewLogger(1),
 		Config: config,
 	}
-
+	server.PanicHandler = DefaultPanicHandler
 	server.pipes = map[string]*Pipe{}
 	server.DefaultPipeHandlers = []PipeHandler{
 		server.GetLogPipeHandler(),
@@ -56,7 +58,7 @@ func NewServer(config *Config) *Server {
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.defaultPipe = newPipe(s, s.DefaultPipeHandlers...)
 	h := s.defaultPipe.HTTPHandler(s.Router)
-	h.ServeHTTP(w, r)
+	h.ServeHTTP(NewResponseWriter(w), r)
 }
 
 func (s *Server) NewPipe(name string, handlers ...PipeHandler) *Pipe {
