@@ -18,9 +18,8 @@ type router struct {
 	router *mux.Router
 }
 
-func NewRouter(notFound http.Handler) Router {
+func newRouter() Router {
 	gorillaRouter := mux.NewRouter()
-	gorillaRouter.NotFoundHandler = notFound
 	return &router{router: gorillaRouter}
 }
 

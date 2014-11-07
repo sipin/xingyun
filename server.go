@@ -18,10 +18,10 @@ type Server struct {
 	Logger              Logger
 	SecureCookie        *securecookie.SecureCookie
 	DefaultPipeHandlers []PipeHandler
-	StaticHandler       http.Handler
 
-	pipes map[string]*Pipe
-	l     net.Listener
+	pipes       map[string]*Pipe
+	defaultPipe *Pipe
+	l           net.Listener
 }
 
 func NewServer(config *Config) *Server {
@@ -38,11 +38,11 @@ func NewServer(config *Config) *Server {
 	server.DefaultPipeHandlers = []PipeHandler{
 		server.GetLogPipeHandler(),
 		server.GetRecoverPipeHandler(),
+		server.GetStaticPipeHandler(),
 		server.GetContextPipeHandler(),
 	}
 
-	server.StaticHandler = server.GetStaticHandler()
-	server.Router = NewRouter(server.StaticHandler)
+	server.Router = newRouter()
 	server.StaticDir = http.Dir(config.StaticDir)
 
 	server.SecureCookie = securecookie.New(
@@ -54,7 +54,9 @@ func NewServer(config *Config) *Server {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.Router.ServeHTTP(NewResponseWriter(w), r)
+	s.defaultPipe = newPipe(s, s.DefaultPipeHandlers...)
+	h := s.defaultPipe.HTTPHandler(s.Router)
+	h.ServeHTTP(w, r)
 }
 
 func (s *Server) NewPipe(name string, handlers ...PipeHandler) *Pipe {

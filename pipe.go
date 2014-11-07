@@ -79,9 +79,6 @@ func (p *Pipe) ContextHandler(h ContextHandler) ContextHandler {
 }
 
 func (p *Pipe) Use(handlers ...PipeHandler) {
-	if len(p.Server.DefaultPipeHandlers) != 0 {
-		p.Handlers = p.Server.DefaultPipeHandlers
-	}
 	for _, h := range handlers {
 		p.Handlers = append(p.Handlers, h)
 	}

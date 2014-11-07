@@ -6,13 +6,6 @@ import (
 	"strings"
 )
 
-func (s *Server) GetStaticHandler() http.Handler {
-	staticPipe := s.NewPipe("_XINGYUN_STATIC_",
-		s.GetStaticPipeHandler(),
-	)
-	return staticPipe.HTTPHandler(http.NotFoundHandler())
-}
-
 func (s *Server) GetStaticPipeHandler() PipeHandler {
 	return PipeHandlerFunc(func(rw http.ResponseWriter, r *http.Request, next http.Handler) {
 		cfg := s.Config
