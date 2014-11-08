@@ -12,22 +12,6 @@ import (
 	"code.google.com/p/xsrftoken"
 )
 
-// XSRF is used to get the current token and validate a suspect token.
-type XSRF interface {
-	// Return HTTP header to search for token.
-	GetHeaderName() string
-	// Return form value to search for token.
-	GetFormName() string
-	// Return cookie name to search for token.
-	GetCookieName() string
-	// Return the token.
-	GetToken() string
-	// Validate by token.
-	ValidToken(t string) bool
-	// Error replies to the request with a custom function when ValidToken fails.
-	Error(w http.ResponseWriter)
-}
-
 type xsrf struct {
 	// Header name value for setting and getting xsrf token.
 	Header string
@@ -76,8 +60,8 @@ func (c *xsrf) Error(w http.ResponseWriter) {
 	c.ErrorFunc(w)
 }
 
-// Options maintains options to manage behavior of Generate.
-type Options struct {
+// xsrfOptions maintains options to manage behavior of Generate.
+type xsrfOptions struct {
 	// The global secret value used to generate Tokens.
 	Secret string
 	// HTTP header used to set and get token.
@@ -112,8 +96,8 @@ func formatName(name string) string {
 	return string(r)
 }
 
-func getXSRFOptions(name string, cfg *Config) *Options {
-	opts := &Options{
+func getXSRFxsrfOptions(name string, cfg *Config) *xsrfOptions {
+	opts := &xsrfOptions{
 		Header:         "X-XSRFToken",
 		Form:           formatName("_" + name + "_xsrf"),
 		Cookie:         formatName("_" + name + "_xsrf"),
@@ -129,7 +113,7 @@ func getXSRFOptions(name string, cfg *Config) *Options {
 	return opts
 }
 
-func isAllowedOrigin(opts *Options, r *http.Request) bool {
+func isAllowedOrigin(opts *xsrfOptions, r *http.Request) bool {
 	if r.Header.Get("Origin") == "" {
 		return true
 	}
@@ -150,7 +134,7 @@ func isAllowedOrigin(opts *Options, r *http.Request) bool {
 	return isAllowed
 }
 
-func setCookie(opts *Options, x *xsrf, w http.ResponseWriter, r *http.Request) {
+func setCookie(opts *xsrfOptions, x *xsrf, w http.ResponseWriter, r *http.Request) {
 	expire := time.Now().AddDate(0, 0, 1)
 	// Verify the domain is valid. If it is not, set as empty.
 	domain := strings.Split(r.Host, ":")[0]
@@ -174,7 +158,7 @@ func setCookie(opts *Options, x *xsrf, w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, cookie)
 }
 
-func removeCookie(opts *Options, w http.ResponseWriter, r *http.Request) {
+func removeCookie(opts *xsrfOptions, w http.ResponseWriter, r *http.Request) {
 	expire := time.Now().AddDate(0, 0, -1)
 	domain := strings.Split(r.Host, ":")[0]
 	if ok, err := regexp.Match(domainReg, []byte(domain)); !ok || err != nil {
@@ -203,7 +187,7 @@ func (s *Server) GetXSRFGeneratePipeHandler() PipeHandler {
 		defer s.Logger.Tracef("exit xsrf generater")
 
 		ctx := GetContext(r)
-		opts := getXSRFOptions(s.name(), s.Config)
+		opts := getXSRFxsrfOptions(s.name(), s.Config)
 		x := &xsrf{
 			Secret:    opts.Secret,
 			Header:    opts.Header,
@@ -255,7 +239,7 @@ func (s *Server) GetXSRFValidatePipeHandler() PipeHandler {
 			if !x.ValidToken(token) {
 				s.Logger.Debugf("invalid headker token %s", token)
 				x.Error(w)
-				opts := getXSRFOptions(s.name(), s.Config)
+				opts := getXSRFxsrfOptions(s.name(), s.Config)
 				removeCookie(opts, w, r)
 				return
 			}
@@ -266,7 +250,7 @@ func (s *Server) GetXSRFValidatePipeHandler() PipeHandler {
 			if !x.ValidToken(token) {
 				s.Logger.Debugf("invalid cookie token %s", token)
 				x.Error(w)
-				opts := getXSRFOptions(s.name(), s.Config)
+				opts := getXSRFxsrfOptions(s.name(), s.Config)
 				removeCookie(opts, w, r)
 				return
 			}
@@ -276,7 +260,7 @@ func (s *Server) GetXSRFValidatePipeHandler() PipeHandler {
 		}
 
 		s.Logger.Debugf("can't get token from header or form")
-		opts := getXSRFOptions(s.name(), s.Config)
+		opts := getXSRFxsrfOptions(s.name(), s.Config)
 		removeCookie(opts, w, r)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return

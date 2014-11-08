@@ -82,8 +82,8 @@ type Context struct {
 	isInited   bool
 	flash      *Flash
 	staticData map[string][]string
-	opts       *Options
-	xsrf       XSRF
+	opts       *xsrfOptions
+	xsrf       *xsrf
 }
 
 func GetContext(r *http.Request) *Context {
