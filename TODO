@@ -4,6 +4,6 @@
 * change behaiver of default pipe handler                   OK
 * context use ResponseWriter instead of http.ResponseWriter OK
 * panic if write header after body                          OK
-* add Session
+* add Session                                               OK
 * add PipeHandler ErrorPage
 * Example

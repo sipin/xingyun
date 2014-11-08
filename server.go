@@ -20,6 +20,7 @@ type Server struct {
 	DefaultPipeHandlers []PipeHandler
 	PanicHandler        ContextHandlerFunc
 	ErrorPageHandler    ContextHandlerFunc
+	SessionStorage      SessionStorage
 
 	pipes       map[string]*Pipe
 	defaultPipe *Pipe
@@ -45,6 +46,7 @@ func NewServer(config *Config) *Server {
 
 	server.Router = newRouter(server.getURLVarLoaderPipeHandler())
 	server.StaticDir = http.Dir(config.StaticDir)
+	server.SessionStorage = NewMemoryStore()
 
 	server.SecureCookie = securecookie.New(
 		[]byte(config.CookieSecret),
