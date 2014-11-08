@@ -5,5 +5,6 @@
 * context use ResponseWriter instead of http.ResponseWriter OK
 * panic if write header after body                          OK
 * add Session                                               OK
-* add PipeHandler ErrorPage
+* add PipeHandler ErrorPage                                 OK
+* test and benchmark
 * Example

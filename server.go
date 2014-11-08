@@ -39,6 +39,7 @@ func NewServer(config *Config) *Server {
 	server.PanicHandler = DefaultPanicHandler
 	server.pipes = map[string]*Pipe{}
 	server.DefaultPipeHandlers = []PipeHandler{
+		server.GetErrorPagePipeHandler(),
 		server.GetLogPipeHandler(),
 		server.GetRecoverPipeHandler(),
 		server.GetStaticPipeHandler(),

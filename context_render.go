@@ -32,13 +32,8 @@ func (ctx *Context) NotModified() {
 	ctx.WriteHeader(304)
 }
 
-func (ctx *Context) NotFound(message string) {
+func (ctx *Context) NotFound() {
 	ctx.WriteHeader(404)
-	_, err := ctx.Write([]byte(message))
-	if err != nil {
-		ctx.Logger.Errorf(err.Error())
-		return
-	}
 }
 
 func (ctx *Context) Unauthorized() {
