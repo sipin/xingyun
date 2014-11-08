@@ -141,3 +141,9 @@ func (ctx *Context) parseParams() {
 		ctx.Params[k] = v[0]
 	}
 }
+
+func (ctx *Context) checkHeaderWrite() {
+	if ctx.ResponseWriter.Written() {
+		panic(fmt.Errorf("must write header before body"))
+	}
+}

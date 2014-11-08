@@ -10,6 +10,7 @@ func (ctx *Context) SetCookie(name string, value interface{}) {
 }
 
 func (ctx *Context) SetExpireCookie(name string, value interface{}, sec int64) {
+	ctx.checkHeaderWrite()
 	cookier := ctx.Server.SecureCookie
 	encoded, err := cookier.Encode(name, value)
 	if err != nil {
