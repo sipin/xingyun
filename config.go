@@ -1,5 +1,9 @@
 package xingyun
 
+const (
+	DefaultSecret = "D893ACDB5B524C6X"
+)
+
 type Config struct {
 	CookieSecret string
 
@@ -22,11 +26,10 @@ func setDefaultConfig(config *Config) {
 	if config.StaticDir == "" {
 		config.StaticDir = "static"
 	}
-	// TODO generate random secret
 	if config.CookieSecret == "" {
-		config.CookieSecret = "D893DCDBCB524C6X"
+		config.CookieSecret = DefaultSecret
 	}
 	if config.XSRFSecret == "" {
-		config.XSRFSecret = "D893DCDBCB524C6X"
+		config.XSRFSecret = DefaultSecret
 	}
 }
