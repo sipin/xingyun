@@ -19,7 +19,7 @@ func (s *Server) getURLVarLoaderPipeHandler() PipeHandler {
 				s.Logger.Warnf("param %s is overide by urlVar", k)
 			}
 			ctx.Params[k] = v
-			s.Logger.Infof("load urlVal: %s = %s", k, v)
+			s.Logger.Debugf("load urlVal: %s = %s", k, v)
 		}
 
 		next(w, r)
