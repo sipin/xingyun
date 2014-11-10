@@ -8,6 +8,11 @@ func (ctx *Context) checkXSRF() {
 	}
 }
 
+func (ctx *Context) XSRFName() string {
+	ctx.checkXSRF()
+	return ctx.xsrf.GetFormName()
+}
+
 func (ctx *Context) XSRFToken() string {
 	ctx.checkXSRF()
 	if ctx.xsrf == nil {
