@@ -134,30 +134,6 @@ func isAllowedOrigin(opts *xsrfOptions, r *http.Request) bool {
 	return isAllowed
 }
 
-func setCookie(opts *xsrfOptions, x *xsrf, w http.ResponseWriter, r *http.Request) {
-	expire := time.Now().AddDate(0, 0, 1)
-	// Verify the domain is valid. If it is not, set as empty.
-	domain := strings.Split(r.Host, ":")[0]
-	if ok, err := regexp.Match(domainReg, []byte(domain)); !ok || err != nil {
-		domain = ""
-	}
-
-	cookie := &http.Cookie{
-		Name:       opts.Cookie,
-		Value:      x.Token,
-		Path:       "/",
-		Domain:     domain,
-		Expires:    expire,
-		RawExpires: expire.Format(time.UnixDate),
-		MaxAge:     0,
-		Secure:     opts.Secure,
-		HttpOnly:   false,
-		Raw:        fmt.Sprintf("%s=%s", opts.Cookie, x.Token),
-		Unparsed:   []string{fmt.Sprintf("token=%s", x.Token)},
-	}
-	http.SetCookie(w, cookie)
-}
-
 func removeCookie(opts *xsrfOptions, w http.ResponseWriter, r *http.Request) {
 	expire := time.Now().AddDate(0, 0, -1)
 	domain := strings.Split(r.Host, ":")[0]
@@ -181,6 +157,19 @@ func removeCookie(opts *xsrfOptions, w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, cookie)
 }
 
+func getXSRFId(ctx *Context, name string) string {
+	cookie_name := formatName("_" + name + "_xsrf_id")
+	id, err := ctx.GetStringCookie(cookie_name)
+	if err != nil {
+		id = GenRandString(16)
+		ctx.SetCookie(cookie_name, id)
+		ctx.Logger.Debugf("new xsrf id %s", id)
+	} else {
+		ctx.Logger.Debugf("load xsrf id %s", id)
+	}
+	return id
+}
+
 func (s *Server) GetXSRFGeneratePipeHandler() PipeHandler {
 	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 		s.Logger.Tracef("enter xsrf generater")
@@ -195,7 +184,7 @@ func (s *Server) GetXSRFGeneratePipeHandler() PipeHandler {
 			Cookie:    opts.Cookie,
 			ErrorFunc: opts.ErrorFunc,
 		}
-		x.ID = ctx.UserID
+		x.ID = getXSRFId(ctx, s.name())
 		ctx.xsrf = x
 
 		if !isAllowedOrigin(opts, r) {
@@ -204,13 +193,13 @@ func (s *Server) GetXSRFGeneratePipeHandler() PipeHandler {
 		}
 
 		// If cookie present, map existing token, else generate a new one.
-		if ex, err := r.Cookie(opts.Cookie); err == nil && ex.Value != "" {
-			x.Token = ex.Value
+		if val, err := ctx.GetStringCookie(opts.Cookie); err == nil && val != "" {
+			x.Token = val
 			s.Logger.Debugf("get xsrf token %s", x.Token)
 		} else {
 			x.Token = xsrftoken.Generate(x.Secret, x.ID, "POST")
 			if opts.SetCookie {
-				setCookie(opts, x, w, r)
+				ctx.SetCookie(opts.Cookie, x.Token)
 			}
 			s.Logger.Debugf("generate xsrf token %s", x.Token)
 		}
@@ -238,9 +227,9 @@ func (s *Server) GetXSRFValidatePipeHandler() PipeHandler {
 		if token := r.Header.Get(x.GetHeaderName()); token != "" {
 			if !x.ValidToken(token) {
 				s.Logger.Debugf("invalid headker token %s", token)
-				x.Error(w)
 				opts := getXSRFxsrfOptions(s.name(), s.Config)
 				removeCookie(opts, w, r)
+				x.Error(w)
 				return
 			}
 			next(w, r)
@@ -251,9 +240,9 @@ func (s *Server) GetXSRFValidatePipeHandler() PipeHandler {
 		if token := r.FormValue(x.GetFormName()); token != "" {
 			if !x.ValidToken(token) {
 				s.Logger.Debugf("invalid cookie token %s", token)
-				x.Error(w)
 				opts := getXSRFxsrfOptions(s.name(), s.Config)
 				removeCookie(opts, w, r)
+				x.Error(w)
 				return
 			}
 

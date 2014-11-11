@@ -71,7 +71,6 @@ type Context struct {
 
 	Logger Logger
 
-	UserID string
 	Params map[string]string
 
 	IsPanic      bool
