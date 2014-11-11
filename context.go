@@ -11,6 +11,10 @@ const (
 	CONTEXT_KEY = "_XINGYUN_CONTEXT_"
 )
 
+var (
+	DefaultFormMaxMemmory int64= 64 << 20
+)
+
 type ContextHandler interface {
 	ServeContext(ctx *Context)
 }
@@ -132,7 +136,7 @@ func getUnInitedContext(r *http.Request, w http.ResponseWriter) *Context {
 
 func (ctx *Context) parseParams() {
 	var err error
-	err = ctx.Request.ParseForm()
+	err = ctx.Request.ParseMultipartForm(DefaultFormMaxMemmory)
 	if err != nil {
 		ctx.Logger.Errorf(err.Error())
 		return
