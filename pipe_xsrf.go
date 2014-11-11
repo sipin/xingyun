@@ -235,8 +235,7 @@ func (s *Server) GetXSRFValidatePipeHandler() PipeHandler {
 			next(w, r)
 			return
 		}
-		s.Logger.Errorf(x.GetFormName())
-		s.Logger.Errorf(r.FormValue(x.GetFormName()))
+
 		if token := r.FormValue(x.GetFormName()); token != "" {
 			if !x.ValidToken(token) {
 				s.Logger.Debugf("invalid cookie token %s", token)
