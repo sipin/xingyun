@@ -12,7 +12,7 @@ const (
 )
 
 var (
-	DefaultFormMaxMemmory int64= 64 << 20
+	DefaultFormMaxMemmory int64 = 64 << 20
 )
 
 type ContextHandler interface {
@@ -136,7 +136,7 @@ func getUnInitedContext(r *http.Request, w http.ResponseWriter) *Context {
 func (ctx *Context) parseParams() {
 	var err error
 	err = ctx.Request.ParseMultipartForm(DefaultFormMaxMemmory)
-	if err != nil {
+	if err != nil && err.Error() != http.ErrNotMultipart.Error() {
 		ctx.Logger.Errorf(err.Error())
 		return
 	}
