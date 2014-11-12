@@ -5,6 +5,8 @@ const (
 )
 
 type Config struct {
+	EnableDebug bool
+
 	CookieSecret string
 
 	StaticDir       string

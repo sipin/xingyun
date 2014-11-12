@@ -33,7 +33,7 @@ func NewServer(config *Config) *Server {
 	}
 	setDefaultConfig(config)
 	server := &Server{
-		Logger: logex.NewLogger(1),
+		Logger: &debugLogger{Logger: logex.NewLogger(1), enableDebug: config.EnableDebug},
 		Config: config,
 	}
 	server.PanicHandler = DefaultPanicHandler
