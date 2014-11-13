@@ -1,6 +1,7 @@
 package xingyun
 
 import (
+	"encoding/json"
 	"mime"
 	"strings"
 )
@@ -20,12 +21,21 @@ func (ctx *Context) SetContentType(val string) string {
 	}
 	return ctype
 }
+
 func (ctx *Context) WriteString(s string) {
 	_, err := ctx.Write([]byte(s))
 	if err != nil {
 		ctx.Logger.Errorf(err.Error())
 		return
 	}
+}
+
+func (ctx *Context) WriteJSON(obj interface{}) {
+	bs, err := json.Marshal(obj)
+	if err != nil {
+		panic(err)
+	}
+	ctx.Write(bs)
 }
 
 func (ctx *Context) NotModified() {
