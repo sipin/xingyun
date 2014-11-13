@@ -22,6 +22,9 @@ type router struct {
 func newRouter(afterRoute PipeHandler) *router {
 	gorillaRouter := mux.NewRouter()
 	gorillaRouter.KeepContext = true
+	gorillaRouter.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(404)
+	})
 	return &router{router: gorillaRouter, afterRoute: afterRoute}
 }
 
