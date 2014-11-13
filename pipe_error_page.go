@@ -11,7 +11,7 @@ func (s *Server) GetErrorPagePipeHandler() PipeHandler {
 		ctx := GetContext(r)
 		status := ctx.ResponseWriter.Status()
 		if status >= 400 && status <= 599 {
-			if s.ErrorPageHandler != nil {
+			if s.ErrorPageHandler != nil && ctx.ResponseWriter.Size() == 0 {
 				s.ErrorPageHandler.ServeContext(ctx)
 			}
 		}
