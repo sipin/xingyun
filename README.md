@@ -1,31 +1,41 @@
-## 行云 ##
+## XingYun ##
 
-### 对象 ###
+XingYun is a web framework with negroni like middleware and web.go like API.
 
-- Server: 包含处理请求的所有相关组件。继承Router，用于设置路由。Pipe容器，管理Pipe
-- Pipe: PipeHandler队列
-- Context: 请求相关的数据
+Difference compare to negroni and web.go
 
-### 接口 ###
+
+- negroni: XingYun have Context that wrap Request and ResponseWriter. The Context have a easy to use API. XingYun have pipe to manage middleware.
+
+- web.go: All feature in XingYun is composed by middleware and every middleware can replaced by user. The middleware also can do other pre-request or post-request features.    
+
+
+### Object ###
+
+Important object
+
+- Server: Server contains everything and implement router. Server also is a pipe container to manage pipe.
+- Pipe: PipeHandler queue. Pipe is also a PipeHandler and http.Handler
+- Context: contain request related data and have easy to use API.
+
+### Interface ###
+
+Interface in XingYun
 
 - ContextHandler:
+  process request with context
 
 		type ContextHandler interface {
 			ServeContext(ctx *Context)
 		}
 
-
-- PipeHandler (类似negroni.Handler)
-- Config
-- Logger: 统一LOG格式
-- Router: 设置路由
-
-### 目标 ###
-
-- 使用接口类似web.go
-- 提供类似negroni的web中间件机制
+- PipeHandler (like negroni.Handler)
+- Logger: used to print log
+- Router: set route
 
 ### Context ###
+
+context support features below
 
 - Cookie
 - Session
@@ -39,3 +49,6 @@
 - Recover
 - Static
 - XSRF
+- ErrorPage
+- Context
+- URLVarLoader
