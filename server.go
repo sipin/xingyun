@@ -5,7 +5,6 @@ import (
 	"net"
 	"net/http"
 
-	"code.1dmy.com/xyz/logex"
 	"github.com/gorilla/securecookie"
 )
 
@@ -33,7 +32,7 @@ func NewServer(config *Config) *Server {
 	}
 	setDefaultConfig(config)
 	server := &Server{
-		Logger: &debugLogger{Logger: logex.NewLogger(1), enableDebug: config.EnableDebug},
+		Logger: &debugLogger{Logger: NewSimpleLevelLogger(1), enableDebug: config.EnableDebug},
 		Config: config,
 	}
 	server.PanicHandler = DefaultPanicHandler
