@@ -8,8 +8,8 @@ import (
 
 func (s *Server) GetContextPipeHandler() PipeHandler {
 	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-		s.Logger.Tracef("enter context handler")
-		defer s.Logger.Tracef("exit context handler")
+		s.logger.Tracef("enter context handler")
+		defer s.logger.Tracef("exit context handler")
 
 		ctx := initContext(r, w, s)
 		next(w, r)

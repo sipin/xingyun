@@ -172,8 +172,8 @@ func getXSRFId(ctx *Context, name string) string {
 
 func (s *Server) GetXSRFGeneratePipeHandler() PipeHandler {
 	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-		s.Logger.Tracef("enter xsrf generater")
-		defer s.Logger.Tracef("exit xsrf generater")
+		s.logger.Tracef("enter xsrf generater")
+		defer s.logger.Tracef("exit xsrf generater")
 
 		ctx := GetContext(r)
 		opts := getXSRFxsrfOptions(s.name(), s.Config)
@@ -195,13 +195,13 @@ func (s *Server) GetXSRFGeneratePipeHandler() PipeHandler {
 		// If cookie present, map existing token, else generate a new one.
 		if val, err := ctx.GetStringCookie(opts.Cookie); err == nil && val != "" {
 			x.Token = val
-			s.Logger.Debugf("get xsrf token %s", x.Token)
+			s.logger.Debugf("get xsrf token %s", x.Token)
 		} else {
 			x.Token = xsrftoken.Generate(x.Secret, x.ID, "POST")
 			if opts.SetCookie {
 				ctx.SetCookie(opts.Cookie, x.Token)
 			}
-			s.Logger.Debugf("generate xsrf token %s", x.Token)
+			s.logger.Debugf("generate xsrf token %s", x.Token)
 		}
 
 		if opts.SetHeader {
@@ -214,8 +214,8 @@ func (s *Server) GetXSRFGeneratePipeHandler() PipeHandler {
 
 func (s *Server) GetXSRFValidatePipeHandler() PipeHandler {
 	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-		s.Logger.Tracef("enter xsrf validater")
-		defer s.Logger.Tracef("exit xsrf validater")
+		s.logger.Tracef("enter xsrf validater")
+		defer s.logger.Tracef("exit xsrf validater")
 
 		if r.Method == "GET" || r.Method == "HEAD" {
 			next(w, r)
@@ -226,7 +226,7 @@ func (s *Server) GetXSRFValidatePipeHandler() PipeHandler {
 		x := ctx.xsrf
 		if token := r.Header.Get(x.GetHeaderName()); token != "" {
 			if !x.ValidToken(token) {
-				s.Logger.Debugf("invalid headker token %s", token)
+				s.logger.Debugf("invalid headker token %s", token)
 				opts := getXSRFxsrfOptions(s.name(), s.Config)
 				removeCookie(opts, w, r)
 				x.Error(w)
@@ -238,7 +238,7 @@ func (s *Server) GetXSRFValidatePipeHandler() PipeHandler {
 
 		if token := r.FormValue(x.GetFormName()); token != "" {
 			if !x.ValidToken(token) {
-				s.Logger.Debugf("invalid cookie token %s", token)
+				s.logger.Debugf("invalid cookie token %s", token)
 				opts := getXSRFxsrfOptions(s.name(), s.Config)
 				removeCookie(opts, w, r)
 				x.Error(w)
@@ -249,7 +249,7 @@ func (s *Server) GetXSRFValidatePipeHandler() PipeHandler {
 			return
 		}
 
-		s.Logger.Debugf("can't get token from header or form")
+		s.logger.Debugf("can't get token from header or form")
 		opts := getXSRFxsrfOptions(s.name(), s.Config)
 		removeCookie(opts, w, r)
 		http.Error(w, "Bad Request", http.StatusBadRequest)

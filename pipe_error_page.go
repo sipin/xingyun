@@ -4,8 +4,8 @@ import "net/http"
 
 func (s *Server) GetErrorPagePipeHandler() PipeHandler {
 	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-		s.Logger.Tracef("enter error page handler")
-		defer s.Logger.Tracef("exit error page handler")
+		s.logger.Tracef("enter error page handler")
+		defer s.logger.Tracef("exit error page handler")
 
 		next(w, r)
 		ctx := GetContext(r)

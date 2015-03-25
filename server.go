@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/securecookie"
 )
@@ -14,7 +15,6 @@ type Server struct {
 	StaticDir http.FileSystem
 
 	Name                string
-	Logger              Logger
 	SecureCookie        *securecookie.SecureCookie
 	DefaultPipeHandlers []PipeHandler
 	PanicHandler        ContextHandlerFunc
@@ -24,6 +24,7 @@ type Server struct {
 	pipes       map[string]*Pipe
 	defaultPipe *Pipe
 	l           net.Listener
+	logger      Logger
 }
 
 func NewServer(config *Config) *Server {
@@ -32,7 +33,7 @@ func NewServer(config *Config) *Server {
 	}
 	setDefaultConfig(config)
 	server := &Server{
-		Logger: &debugLogger{Logger: NewSimpleLevelLogger(1), enableDebug: config.EnableDebug},
+		logger: &debugLogger{Logger: NewSimpleLevelLogger(os.Stdout), enableDebug: config.EnableDebug},
 		Config: config,
 	}
 	server.PanicHandler = DefaultPanicHandler
@@ -54,6 +55,10 @@ func NewServer(config *Config) *Server {
 	)
 
 	return server
+}
+
+func (s *Server) SetLogger(l Logger) {
+	s.logger = &debugLogger{Logger: l, enableDebug: s.Config.EnableDebug}
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -92,13 +97,13 @@ func (s *Server) name() string {
 func (s *Server) ListenAndServe(addr string) error {
 	l, err := net.Listen("tcp", addr)
 	if err != nil {
-		s.Logger.Errorf(err.Error())
+		s.logger.Errorf(err.Error())
 	}
 	s.l = l
-	s.Logger.Infof("%s start in: %s", s.name(), addr)
+	s.logger.Infof("%s start in: %s", s.name(), addr)
 	err = http.Serve(s.l, s)
 	// todo: must handle error when serve failed
-	// s.Logger.Errorf("%s stop, err='%s'", err)
+	// s.logger.Errorf("%s stop, err='%s'", err)
 	return err
 }
 

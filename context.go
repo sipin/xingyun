@@ -111,7 +111,7 @@ func initContext(r *http.Request, w http.ResponseWriter, s *Server) *Context {
 		Request:        r,
 		Server:         s,
 		Config:         s.Config,
-		Logger:         s.Logger,
+		Logger:         s.logger,
 		Params:         map[string]string{},
 		Data:           map[string]interface{}{},
 		staticData:     map[string][]string{},
@@ -119,7 +119,7 @@ func initContext(r *http.Request, w http.ResponseWriter, s *Server) *Context {
 	ctx.parseParams()
 	ctx.isInited = true
 	context.Set(r, CONTEXT_KEY, ctx)
-	s.Logger.Debugf("init context, &r=%p", r)
+	s.logger.Debugf("init context, &r=%p", r)
 	return ctx
 }
 

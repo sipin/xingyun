@@ -7,20 +7,20 @@ import (
 
 func (s *Server) GetLogPipeHandler() PipeHandler {
 	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-		s.Logger.Tracef("enter logger")
-		defer s.Logger.Tracef("exit logger")
+		s.logger.Tracef("enter logger")
+		defer s.logger.Tracef("exit logger")
 
 		start := time.Now()
 		next(w, r)
 
 		res := w.(ResponseWriter)
-		log := s.Logger.Infof
+		log := s.logger.Infof
 		status := res.Status()
 		if status >= 500 && status <= 599 {
-			log = s.Logger.Errorf
+			log = s.logger.Errorf
 		}
 		if status >= 400 && status <= 499 {
-			log = s.Logger.Warnf
+			log = s.logger.Warnf
 		}
 		log("%v %s %s %s in %v", res.Status(), r.Method, r.Host, r.URL.Path, time.Since(start))
 	})

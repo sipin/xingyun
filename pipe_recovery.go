@@ -17,7 +17,7 @@ func DefaultPanicHandler(ctx *Context) {
 
 func (s *Server) GetRecoverPipeHandler() PipeHandler {
 	return PipeHandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-		s.Logger.Tracef("enter recover handler")
+		s.logger.Tracef("enter recover handler")
 
 		defer func() {
 			if err := recover(); err != nil {
@@ -35,7 +35,7 @@ func (s *Server) GetRecoverPipeHandler() PipeHandler {
 				ctx.StackMessage = strings.Join(stacks, "\n")
 				s.PanicHandler(ctx)
 			}
-			s.Logger.Tracef("exit recover handler")
+			s.logger.Tracef("exit recover handler")
 		}()
 
 		next(w, r)
